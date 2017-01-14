@@ -2,59 +2,72 @@
 #include <tins/tins.h>
 #include <string> 
 #include <ctype.h>
+#include <iostream>
 
 using namespace std;
 using namespace Tins;
 
-enum {CMD, CH, SSID1, SSID2, SSID3, SSID4, SSID5, SSID6, SSID7, SSID8, SSID9, SSID10};
+enum {CMD, CH, SSID};
 
 int main(int argc, char * argv[]) {
 	int channel = 0;
-	int ssid_max = argc - 2; // remove commned&channel
-	int ssid = SSID1;
+	int ssid_num = argc - SSID;// remove commned&channel
+	int next_ssid = 0;
+	int now_ssid=SSID;
 	int insert_ch=stoi(argv[CH]);
-	if(argc < 3 && argc > SSID10){
-		printf("using beacon [channel] '[ssid_1]' ... '[ssid_10]' \n");
+	string s_bssid;			// source bssid
+	string d_bssid;			// destination bssid
+
+	if(argc < 3){			// check arguments
+		printf("using beacon [channel] [ssid_1] ... \n");
 		return -1;
-	}
-	
-	if(!isdigit(insert_ch) || insert_ch > 14) {
-		channel = insert_ch;
+	}						// ckeck channel
+	else if(isdigit(insert_ch) || 13 < insert_ch || insert_ch < 1) {	
+		printf("[channel] is number and 1~13 \n");
+		return -1;
 	}
 	else {
-		printf("using beacon '[channel]' [ssid_1] ... [ssid_10] \n");
-		return -1;
-	}	
-	
-	//string ap_s = "00:11:22:33:44:5";
-		//how to change mac address each ssid? T^T 
-	
+		channel = insert_ch;
+	}
+
 	while (true){
 		RadioTap tap;
-			
-		//Dot11::address_type ap=ap_s.append(to_string(ssid));
-			// I guess not support type "string" T^T
-		
-		Dot11::address_type ap="00:11:22:33:44:55";		//Access Point Mac address
-		Dot11::address_type unicast="ff:ff:ff:ff:ff:ff";//Target Mac address [brodcast ff:ff:ff:ff:ff:ff]	
 
-		Dot11Beacon beacon(unicast, ap);	//set beacon frame
-		beacon.addr4(ap);					//set AP MAC
-		beacon.ssid(argv[ssid]);			//set ssid
-		beacon.ds_parameter_set(channel);	//set channel
+		if(ssid_num <= 16){
+			s_bssid = "83:13:bc:ab:55:7";
+			s_bssid = s_bssid+to_string(next_ssid);
+		}
+		else if (ssid_num <= 255) {
+			s_bssid = "83:13:bc:ab:55:";
+			s_bssid = s_bssid+to_string(next_ssid);
+		}
+		else{
+			printf("to many ssids!");
+		}
 		
+		d_bssid = "ff:ff:ff:ff:ff:ff";
+		
+		Dot11Beacon beacon;					//set beacon frame
+		beacon.addr1(d_bssid);				//set destination ssid
+		beacon.addr2(s_bssid);				//set beacon bssid
+		beacon.addr3(beacon.addr2());		//set beacon bssid
+		
+		beacon.ssid(argv[now_ssid]);			//set ssid
+		beacon.ds_parameter_set(channel);	//set channel
+
 		beacon.supported_rates({ 1.0f, 5.5f, 11.0f }); //what is it? (only work C++11)
 		tap.inner_pdu(beacon);	// may be 802.11 frame 
 		
 		PacketSender sender("usbwlan0");	//select network interface
 		sender.send(tap);					//send pdu
-		usleep(10000);
+		usleep(100000);
 
-		if(ssid > ssid_max){
-			ssid = SSID1;
+		if(next_ssid < ssid_num){
+			next_ssid = 0;
 		}
 		else {
-			ssid++;
+			next_ssid++;
 		}
+		now_ssid=SSID+next_ssid;
 	}
 }
