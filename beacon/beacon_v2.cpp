@@ -60,7 +60,7 @@ int main(int argc, char * argv[]) {
 		
 		PacketSender sender("usbwlan0");	//select network interface
 		sender.send(tap);					//send pdu
-		usleep(100000);
+		usleep(1000);
 
 		if(now_ssid > argc - 2){
 			next_ssid = 0;
