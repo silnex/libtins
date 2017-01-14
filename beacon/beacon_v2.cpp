@@ -33,12 +33,12 @@ int main(int argc, char * argv[]) {
 	while (true){
 		RadioTap tap;
 
-		if(ssid_num <= 16){
-			s_bssid = "83:13:bc:ab:55:7";
+		if(ssid_num < 10){			//need change int to hex
+			s_bssid = "00:11:22:33:44:5";
 			s_bssid = s_bssid+to_string(next_ssid);
 		}
-		else if (ssid_num <= 255) {
-			s_bssid = "83:13:bc:ab:55:";
+		else if (ssid_num < 100) {	//need change int to hex
+			s_bssid = "00:11:22:33:44:";
 			s_bssid = s_bssid+to_string(next_ssid);
 		}
 		else{
@@ -62,7 +62,7 @@ int main(int argc, char * argv[]) {
 		sender.send(tap);					//send pdu
 		usleep(100000);
 
-		if(next_ssid < ssid_num){
+		if(now_ssid > argc - 2){
 			next_ssid = 0;
 		}
 		else {
