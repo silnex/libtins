@@ -62,7 +62,7 @@ int main(int argc, char * argv[]) {
 		sender.send(tap);			//send pdu
 		usleep(1000);
 
-		(now_ssid > argc - 2)?( next_ssid = 0; ):( next_ssid++; )
+		(now_ssid > argc - 2)?( next_ssid = 0 ):( next_ssid++ );
 							//test not yet
 		now_ssid=SSID+next_ssid;
 	}
