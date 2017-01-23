@@ -34,8 +34,7 @@ void BeaconSniffer::run(const std::string & iface){
 
 bool BeaconSniffer::callback (PDU & pdu){
 	const Dot11Beacon& beacon = pdu.rfind_pdu<Dot11Beacon>();
-	const IP &ip = pdu.rfind_pdu<IP>();
-
+	
 	if(!beacon.from_ds() && !beacon.to_ds()){
 		address_type addr = beacon.addr2();
 
@@ -46,7 +45,7 @@ bool BeaconSniffer::callback (PDU & pdu){
 				string ssid = beacon.ssid();
 				ssids.insert(addr);
 				
-				cout << addr << "\t" << ssid << "\t_" << ip << endl;
+				cout << addr << "\t" << (int)beacon.ds_parameter_set() << "\t" <<ssid << endl;
 			}
 			catch(runtime_error&){
 
@@ -66,7 +65,7 @@ int main (int argc, char * argv[]){
 	string interface = argv[1];
 	BeaconSniffer sniffer;
 	system("clear");
-	cout << "BSSID\t\t\tESSID" << endl;
+	cout << "BSSID\t\t\tCH\tESSID" << endl;
 	sniffer.run(interface);
 
 }
