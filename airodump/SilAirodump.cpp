@@ -26,32 +26,40 @@ private:
 void BeaconSniffer::run(const std::string & iface){
 	SnifferConfiguration config;
 	config.set_promisc_mode(true);
-	config.set_filter("type mgt subtype beacon");
+	config.set_filter("(type data subtype qos-data) or (type mgt subtype beacon)");
 	config.set_rfmon(true);
 	Sniffer sniffer(iface, config);
 	sniffer.sniff_loop(make_sniffer_handler(this, &BeaconSniffer::callback));
 }
 
 bool BeaconSniffer::callback (PDU & pdu){
-	const Dot11Beacon& beacon = pdu.rfind_pdu<Dot11Beacon>();
+	//const Dot11Beacon& beacon = pdu.rfind_pdu<Dot11Beacon>();
+	const Dot11QoSData& test = pdu.rfind_pdu<Dot11QoSData>();
+
+	address_type tddr1 = test.addr1();
+	address_type tddr2 = test.addr2();
+
+	cout<< tddr1 << " : " << tddr2 <<endl;
 	
-	if(!beacon.from_ds() && !beacon.to_ds()){
+	/*if(!beacon.from_ds() && !beacon.to_ds()){
 		address_type addr = beacon.addr2();
+		//address_type addr_dest = beacon.addr1();
 
 		ssids_type::iterator it = ssids.find(addr);
-
+		
 		if(it == ssids.end()){
 			try{
 				string ssid = beacon.ssid();
 				ssids.insert(addr);
 				
 				cout << addr << "\t" << (int)beacon.ds_parameter_set() << "\t" <<ssid << endl;
+				//cout << "test " << addr_dest << endl;
 			}
 			catch(runtime_error&){
 
 			}
 		}
-	}
+	}*/
 	return true;
 }
 

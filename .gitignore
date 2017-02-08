@@ -27,3 +27,8 @@
 *.exe
 *.out
 *.app
+
+# Qtcreator
+*.pro
+*.pro.user
+build-*
